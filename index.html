@@ -18,7 +18,7 @@
 <body>
     <h2> DWTLK </h2>
     <button type="button" class="btn btn-primary" value="Start Game" id="play_bunny_button" >Play Bunny</button>
-    <button type="button" class="btn btn-warning" value="Stay" id="stay_button" >Stay</button>
+    <button type="button" class="btn btn-warning" value="Stay" id="stay_button"  hidden="hidden">Attack</button>
 
     <span>Bunny Library:<span id="bunny_library_count">15</span></span>
     <span>Games Played:<span id="games_played">0</span></span>
@@ -926,6 +926,7 @@
         console.log('New Game!');
         games++;
         table.play(bunnyLibrary.draw());
+        document.getElementById('stay_button').hidden = false;
 
 
         if (!table.isRedacted()) {
@@ -983,6 +984,7 @@
             }
         }
         table.cleanUp();
+
     }
 
 
@@ -997,6 +999,8 @@
             alert('Out of bunnies! ')
             return;
         }
+
+        document.getElementById('stay_button').hidden = false;
 
         document.getElementById('last_game_outcome').innerText = '';
         table.play(bunnyLibrary.draw());
@@ -1044,6 +1048,7 @@
 
         document.getElementById('bunny_library_count').innerText = bunnyLibrary.numberOfCards()
         table.cleanUp();
+       document.getElementById('stay_button').hidden = true;
     }
 
     document.getElementById('play_bunny_button').addEventListener("click", play_bunny_button);
