@@ -1015,25 +1015,25 @@
     }
 
    let stay_button = function (){
-        games++;
+       games++;
         let last_game_outcome = document.getElementById('last_game_outcome')
 
        table.stay();
+       table.drawBoard(false);
 
-        table.drawBoard(false);
         if (table.didPlayerWin()) {
             console.log('Rabbits win!');
-            last_game_outcome.innerText = 'Rabbit Wins!';
+            last_game_outcome.innerText = 'Rabbit Wins!' + ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
 
             let newPoints = table.claimPrize();
             points += newPoints;
             console.log('Took ' + newPoints + ' lizards hostage');
         } else if (table.didPlayerTie()) {
             console.log('Tie Game!');
-            last_game_outcome.innerText = 'Tie Game';
+            last_game_outcome.innerText = 'Tie Game' + ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
         } else {
             console.log('Lizard King wins!');
-            last_game_outcome.innerText = 'Lizard King Wins!';
+            last_game_outcome.innerText = 'Lizard King Wins!' + ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
         }
         if (table.didPlayerWin() || table.didPlayerTie()) {
             let returnedCards = table.retrievePlayedCards();
