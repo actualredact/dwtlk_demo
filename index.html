@@ -187,18 +187,28 @@
 
         }
 
-        actionsToHTML() {
+        actionsToHTML(redacted) {
             let actionHTML = '';
             for (let actionPointer = 0; actionPointer < this.actionStack.length; actionPointer++) {
-                if (this.actionStack[actionPointer].type === 'SPECIAL') {
-                    actionHTML += `<li class="list-group-item">${this.actionStack[actionPointer][1]}</li>`
-                } else {
-                    actionHTML += `<li class="list-group-item">${this.actionStack[actionPointer][1]} ${this.actionStack[actionPointer][2]}</li>`
+                if (redacted){
+                    if (this.actionStack[actionPointer][0] === 'SPECIAL') {
+                        actionHTML += `<li class="list-group-item">${this.actionStack[actionPointer][1]}</li>`
+                    } else {
+                        actionHTML += `<li class="list-group-item">${this.actionStack[actionPointer][1]} ${this.actionStack[actionPointer][2]}</li>`
+                    }
+                }else {
+                    if (this.actionStack[actionPointer][0] === 'SPECIAL') {
+                        actionHTML += `<li class="list-group-item">[${this.piStack[actionPointer].special}]</li>`
+                    } else if (this.actionStack[actionPointer][0] === 'ACTION'){
+                        actionHTML += `<li class="list-group-item">[${this.piStack[actionPointer].suit}] ${this.actionStack[actionPointer][2]}</li>`
+                    } else if (this.actionStack[actionPointer][0] === 'NUMBER'){
+                        actionHTML += `<li class="list-group-item">${this.actionStack[actionPointer][1]} [${this.piStack[actionPointer].number}] </li>`
+                    }
                 }
             }
             return actionHTML;
         }
-        cardToHTML() {
+        cardToHTML(redacted = true) {
             return `
             <div class="col col-sm-2">
                 <div class="card">
@@ -207,7 +217,7 @@
                         <h5 class="card-title">${this.type}</h5>
                     </div>
                     <ul class="list-group list-group-flush">
-                        ${this.actionsToHTML()}
+                        ${this.actionsToHTML(redacted)}
                     </ul>
                 </div>
             </div>
@@ -863,7 +873,7 @@
 
             for (let cardPointer = 0; cardPointer < this.rr_Slots.length; cardPointer++) {
                 console.log(newBunnyArea)
-                newBunnyArea += this.rr_Slots[cardPointer].cardToHTML();
+                newBunnyArea += this.rr_Slots[cardPointer].cardToHTML(false);
                 newBunnyArea += '<div class="col  col-sm-1">'
                 for (let piCardPointer = 0; piCardPointer < this.rr_Slots[cardPointer].piStack.length; piCardPointer++) {
                     newBunnyArea += this.rr_Slots[cardPointer].piStack[piCardPointer].toHTML(false);
@@ -874,7 +884,7 @@
 
 
             for (let cardPointer = 0; cardPointer < this.rr_SummonSlots.length; cardPointer++) {
-                newBunnyArea += this.rr_SummonSlots[cardPointer].cardToHTML();
+                newBunnyArea += this.rr_SummonSlots[cardPointer].cardToHTML(false);
                 newBunnyArea += '<div class="col  col-sm-1">'
                 for (let piCardPointer = 0; piCardPointer < this.rr_SummonSlots[cardPointer].piStack.length; piCardPointer++) {
                     newBunnyArea += this.rr_SummonSlots[cardPointer].piStack[piCardPointer].toHTML(false);
@@ -884,7 +894,7 @@
             }
 
             for (let cardPointer = 0; cardPointer < this.lk_Slots.length; cardPointer++) {
-                newLizardArea += this.lk_Slots[cardPointer].cardToHTML();
+                newLizardArea += this.lk_Slots[cardPointer].cardToHTML(redacted);
                 newLizardArea += '<div class="col  col-sm-1">'
                 for (let piCardPointer = 0; piCardPointer < this.lk_Slots[cardPointer].piStack.length; piCardPointer++) {
                     newLizardArea += this.lk_Slots[cardPointer].piStack[piCardPointer].toHTML(redacted);
@@ -895,8 +905,8 @@
 
 
             for (let cardPointer = 0; cardPointer < this.lk_SummonSlots.length; cardPointer++) {
-                newLizardArea += this.lk_SummonSlots[cardPointer].cardToHTML();
-                newLizardArea += '<div class="col  col-sm-1">'
+                newLizardArea += this.lk_SummonSlots[cardPointer].cardToHTML(redacted);
+                newLizardArea += '<div class="col col-sm-1">'
                 for (let piCardPointer = 0; piCardPointer < this.lk_SummonSlots[cardPointer].piStack.length; piCardPointer++) {
                     newLizardArea += this.lk_SummonSlots[cardPointer].piStack[piCardPointer].toHTML(false);
                 }
