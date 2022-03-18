@@ -242,7 +242,7 @@
 
         isBlocking(actionPointer) {
 
-            return (this.actionStack[actionPointer] != null && typeof this.actionStack[actionPointer] === 'array') && (
+            return (this.actionStack[actionPointer] != null && typeof this.actionStack[actionPointer] === 'object') && (
                 (this.actionStack[actionPointer][0] === 'ACTION' && this.piStack[actionPointer].suit === 'BLOCK')
                 ||
                 (this.actionStack[actionPointer][0] === 'NUMBER' && this.actionStack[actionPointer][1] === 'BLOCK')
@@ -260,7 +260,7 @@
         }
 
         isCountering(actionPointer) {
-            return (this.actionStack[actionPointer] != null && typeof this.actionStack[actionPointer] === 'array') && (
+            return (this.actionStack[actionPointer] != null && typeof this.actionStack[actionPointer] === 'object') && (
                 (this.actionStack[actionPointer][0] === 'ACTION' && this.piStack[actionPointer].suit === 'COUNTER')
                 ||
                 (this.actionStack[actionPointer][0] === 'NUMBER' && this.actionStack[actionPointer][1] === 'COUNTER')
@@ -268,7 +268,7 @@
         }
 
         isAttacking(actionPointer) {
-            return (this.actionStack[actionPointer] != null && typeof this.actionStack[actionPointer] === 'array') && (
+            return (this.actionStack[actionPointer] != null && typeof this.actionStack[actionPointer] === 'object') && (
                 (this.actionStack[actionPointer][0] === 'ACTION' && this.piStack[actionPointer].suit === 'ATTACK')
                 ||
                 (this.actionStack[actionPointer][0] === 'NUMBER' && this.actionStack[actionPointer][1] === 'ATTACK')
@@ -1015,7 +1015,7 @@
     }
 
    let stay_button = function (){
-       games++;
+        games++;
         let last_game_outcome = document.getElementById('last_game_outcome')
 
        table.stay();
