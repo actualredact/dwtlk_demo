@@ -19,22 +19,25 @@
             margin-top: 10px;
             font-size: small;
         }
+        #help {
+            font-size: small;
+        }
     </style>
 </head>
 <body>
-<h2> DWTLK </h2>
+<h2> DWTLK <span id="help">[<a href='DWTLK.pdf'>Help</a>]</span></h2>
 
 <button type="button" class="btn btn-primary" value="Start Game" id="play_bunny_button" >Play Bunny +</button>
 <button type="button" class="btn btn-warning" value="Stay" id="stay_button"  hidden="hidden">Attack Lizards ⚔️</button>
 
 <div>
-    <span>[<a href='DWTLK.pdf'>Help</a>]</span>
+
     <span>Bunny Library:<span id="bunny_library_count">15</span></span>
     <span>Games Played:<span id="games_played">0</span></span>
     <span>Captured Lizards:<span id="points">0</span></span>
 </div>
 <div>
-    <h4><span id="score"></span><span id="last_game_outcome"></span></h4>
+    <h4><span id="score"></span> <span id="last_game_outcome"></span></h4>
 </div>
 
 <div class="row" id="plays">
@@ -1295,8 +1298,9 @@
         let last_game_outcome = document.getElementById('last_game_outcome')
 
         table.stay();
-        table.drawScore(false);
         table.drawBoard(false);
+        table.drawScore(false);
+
 
         if (table.didPlayerWin()) {
             console.log('Rabbits win!');
@@ -1318,7 +1322,7 @@
                 bunnyLibrary.add(returnedCards[cardPointer]);
             }
         }
-
+        document.getElementById('points').innerText = points;
         document.getElementById('bunny_library_count').innerText = bunnyLibrary.numberOfCards()
         table.cleanUp();
         document.getElementById('stay_button').hidden = true;
