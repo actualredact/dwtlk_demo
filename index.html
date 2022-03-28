@@ -17,7 +17,6 @@
     <style>
         .card {
             margin-top: 10px;
-            
             font-size: small;
         }
     </style>
@@ -26,7 +25,7 @@
 <h2> DWTLK </h2>
 
 <button type="button" class="btn btn-primary" value="Start Game" id="play_bunny_button" >Play Bunny</button>
-<button type="button" class="btn btn-warning" value="Stay" id="stay_button"  hidden="hidden">Attack</button>
+<button type="button" class="btn btn-warning" value="Stay" id="stay_button"  hidden="hidden">Attack Lizards</button>
 
 <div>
     <span>[<a href='DWTLK.pdf'>Help</a>]</span>
@@ -35,7 +34,7 @@
     <span>Captured Lizards:<span id="points">0</span></span>
 </div>
 <div>
-    <h4><span id="last_game_outcome"></span></h4>
+    <h4><span id="score"></span><span id="last_game_outcome"></span></h4>
 </div>
 
 <div class="row" id="plays">
@@ -423,6 +422,8 @@
         constructor() {
             this.piDeck = new PIDeck();
 
+            this.stayed = false;
+
             this.lk_Health = 14;
 
             this.lk_Slots = [];
@@ -475,6 +476,7 @@
         }
 
         stay() {
+            this.stayed = true;
 
             for (let cardPointer = 0; cardPointer < this.rr_Slots.length; cardPointer++ ) {
                 for (let actionPointer = 0; actionPointer < this.rr_Slots[cardPointer].actionStack.length; actionPointer++) {
@@ -695,6 +697,249 @@
             console.log('Redacted Rabbit: ' + this.rr_Health)
         }
 
+        currentScores(redacted = true) {
+
+            let rr_possible_HealthLow= 14;
+            let rr_possible_HealthHigh= 14;
+            let rr_possible_Summons = 0;
+
+            let lk_possible_HealthLow = 14;
+            let lk_possible_HealthHigh = 14;
+            let lk_possible_Summons = 0;
+
+
+            for (let cardPointer = 0; cardPointer < this.rr_Slots.length; cardPointer++ ) {
+                for (let actionPointer = 0; actionPointer < this.rr_Slots[cardPointer].actionStack.length; actionPointer++) {
+                    switch(this.rr_Slots[cardPointer].actionStack[actionPointer][0]) {
+                        case 'SPECIAL':
+                            if (this.rr_Slots[cardPointer].piStack[actionPointer].special === 'SUMMON') {
+                                if (redacted) {
+                                    rr_possible_Summons++;
+                                } else {
+                                    if (!this.lk_Slots[cardPointer].isBlocking(actionPointer)) {
+                                        rr_possible_Summons++;
+                                    }
+                                }
+                            }
+                            break;
+                        case 'ACTION':
+                            switch (this.rr_Slots[cardPointer].piStack[actionPointer].suit) {
+                                case 'ATTACK':
+                                    if (redacted) {
+                                        lk_possible_HealthLow -= this.rr_Slots[cardPointer].actionStack[actionPointer][2];
+                                    } else {
+                                        // Apply any blocks
+                                        if (this.lk_Slots[cardPointer].isBlocking(actionPointer)){
+                                            let health_calc = this.rr_Slots[cardPointer].actionStack[actionPointer][2] - this.lk_Slots[cardPointer].blockAmount(actionPointer);
+                                            if (health_calc > 0) {
+                                                lk_possible_HealthLow -= health_calc;
+                                                lk_possible_HealthHigh -= health_calc;
+                                            }
+
+                                        } else if (this.lk_Slots[cardPointer].isCountering(actionPointer)) {
+                                            // Counter Cancels Attacks
+                                        } else {
+                                            lk_possible_HealthLow -= this.rr_Slots[cardPointer].actionStack[actionPointer][2];
+                                            lk_possible_HealthHigh -= this.rr_Slots[cardPointer].actionStack[actionPointer][2];
+                                        }
+                                    }
+
+
+                                    break;
+                                case'COUNTER':
+                                    // Apply the counter-attack when possible
+                                    // Their attack is canceled elsewhere
+
+                                    if (redacted) {
+                                        lk_possible_HealthLow -= this.rr_Slots[cardPointer].actionStack[actionPointer][2];
+                                    } else {
+                                        if (this.lk_Slots[cardPointer].isAttacking(actionPointer)) {
+                                            lk_possible_HealthLow -= this.rr_Slots[cardPointer].actionStack[actionPointer][2]
+                                            lk_possible_HealthHigh -= this.rr_Slots[cardPointer].actionStack[actionPointer][2]
+                                        }
+                                    }
+                                    break;
+                                case'BLOCK':
+                                    // Block is processed during the attack
+                                    break;
+                                case'HEAL':
+                                    rr_possible_HealthLow += this.rr_Slots[cardPointer].actionStack[actionPointer][2];
+                                    rr_possible_HealthHigh += this.rr_Slots[cardPointer].actionStack[actionPointer][2];
+                                    break;
+                            }
+                            break;
+                        case 'NUMBER':
+                            switch (this.rr_Slots[cardPointer].actionStack[actionPointer][1]) {
+                                case 'ATTACK':
+                                    if (redacted) {
+                                        lk_possible_HealthLow -= this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                    } else {
+
+                                        // Apply any blocks
+                                        if (this.lk_Slots[cardPointer].isBlocking(actionPointer)) {
+                                            let health_calc = this.rr_Slots[cardPointer].piStack[actionPointer].number - this.lk_Slots[cardPointer].blockAmount(actionPointer);
+                                            if (health_calc > 0) {
+                                                lk_possible_HealthLow -= health_calc;
+                                                lk_possible_HealthHigh -= health_calc;
+                                            }
+
+                                        } else if (this.lk_Slots[cardPointer].isCountering(actionPointer)) {
+                                            // Counter Cancels Attacks
+                                        } else {
+                                            lk_possible_HealthLow -= this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                            lk_possible_HealthHigh -= this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                        }
+                                    }
+                                    break;
+                                case'COUNTER':
+
+                                    if (redacted){
+                                        lk_possible_HealthLow -= this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                    }
+                                    // Apply the counter-attack when possible
+                                    // Their attack is canceled elsewhere
+                                    if (this.lk_Slots[cardPointer].isAttacking(actionPointer)){
+                                        lk_possible_HealthLow -= this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                        lk_possible_HealthHigh -= this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                    }
+
+                                    break;
+                                case'BLOCK':
+                                    // block handled during attack
+                                    break;
+                                case'HEAL':
+                                    rr_possible_HealthLow += this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                    rr_possible_HealthHigh += this.rr_Slots[cardPointer].piStack[actionPointer].number;
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            }
+
+
+            for (let cardPointer = 0; cardPointer < this.lk_Slots.length; cardPointer++ ) {
+                for (let actionPointer = 0; actionPointer < this.lk_Slots[cardPointer].actionStack.length; actionPointer++) {
+                    switch(this.lk_Slots[cardPointer].actionStack[actionPointer][0]) {
+                        case 'SPECIAL':
+                            if (this.lk_Slots[cardPointer].piStack[actionPointer].special === 'SUMMON') {
+                                if (redacted){
+                                    lk_possible_Summons++
+                                } else {
+                                    if (!this.rr_Slots[cardPointer].isBlocking(actionPointer)) {
+                                        lk_possible_Summons++
+                                    }
+                                }
+                            }
+                            break;
+                        case 'ACTION':
+                            switch (this.lk_Slots[cardPointer].piStack[actionPointer].suit) {
+                                case 'ATTACK':
+                                    if (redacted){
+                                        rr_possible_HealthLow -= this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                    } else {
+                                        // Apply any blocks
+                                        if (this.rr_Slots[cardPointer].isBlocking(actionPointer)) {
+                                            let health_calc = this.lk_Slots[cardPointer].actionStack[actionPointer][2] - this.rr_Slots[cardPointer].blockAmount(actionPointer);
+                                            if (health_calc > 0) {
+                                                rr_possible_HealthLow -= health_calc;
+                                                rr_possible_HealthHigh -= health_calc;
+                                            }
+
+                                        } else if (this.rr_Slots[cardPointer].isCountering(actionPointer)) {
+                                            // Counter Cancels Attacks
+                                        } else {
+                                            rr_possible_HealthLow -= this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                            rr_possible_HealthHigh -= this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                        }
+                                    }
+                                    break;
+                                case'COUNTER':
+                                    if (redacted) {
+                                        rr_possible_HealthLow -= this.lk_Slots[cardPointer].actionStack[actionPointer][2]
+                                    } else {
+
+                                        // Apply the counter-attack when possible
+                                        // Their attack is canceled elsewhere
+                                        if (this.rr_Slots[cardPointer].isAttacking(actionPointer)) {
+                                            rr_possible_HealthLow -= this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                            rr_possible_HealthHigh -= this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                        }
+                                    }
+                                    break;
+                                case'BLOCK':
+                                    // Block is processed during the attack
+                                    break;
+                                case'HEAL':
+                                    lk_possible_HealthLow += this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                    lk_possible_HealthHigh += this.lk_Slots[cardPointer].actionStack[actionPointer][2];
+                                    break;
+                            }
+                            break;
+                        case 'NUMBER':
+                            switch (this.lk_Slots[cardPointer].actionStack[actionPointer][1]) {
+                                case 'ATTACK':
+                                    if (redacted) {
+                                        rr_possible_HealthLow -= this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                    } else {
+                                        // Apply any blocks
+                                        if (this.rr_Slots[cardPointer].isBlocking(actionPointer)) {
+                                            let health_calc = this.lk_Slots[cardPointer].piStack[actionPointer].number - this.rr_Slots[cardPointer].blockAmount(actionPointer);
+                                            if (health_calc > 0) {
+                                                rr_possible_HealthLow -= health_calc;
+                                                rr_possible_HealthHigh -= health_calc;
+                                            }
+
+                                        } else if (this.rr_Slots[cardPointer].isCountering(actionPointer)) {
+                                            // Counter Cancels Attacks
+                                        } else {
+                                            rr_possible_HealthLow -= this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                            rr_possible_HealthHigh -= this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                        }
+                                    }
+                                    break;
+                                case'COUNTER':
+                                    if (redacted) {
+                                        rr_possible_HealthLow -= this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                    } else {
+
+                                        // Apply the counter-attack when possible
+                                        // Their attack is canceled elsewhere
+                                        if (this.rr_Slots[cardPointer].isAttacking(actionPointer)) {
+                                            rr_possible_HealthLow -= this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                            rr_possible_HealthHigh -= this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                        }
+                                    }
+                                    break;
+                                case'BLOCK':
+                                    // block handled during attack
+                                    break;
+                                case'HEAL':
+                                    lk_possible_HealthLow += this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                    lk_possible_HealthHigh += this.lk_Slots[cardPointer].piStack[actionPointer].number;
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            }
+
+            return {
+                "bunny": {
+                    "low": rr_possible_HealthLow,
+                    "high": rr_possible_HealthHigh,
+                    "summon": rr_possible_Summons,
+
+                },
+                "lizard": {
+                    "low": lk_possible_HealthLow,
+                    "high": lk_possible_HealthHigh,
+                    "summon": lk_possible_Summons,
+                }
+            }
+
+        }
+
         didPlayerWin(){
             return this.rr_Health > this.lk_Health;
         }
@@ -787,7 +1032,13 @@
             console.log('Possible Blocks ' + possible_Block);
             console.log('Summons ' + possible_Summons);
 
-
+            return {
+                "possibleHealth": possible_Health,
+                "possibleDamageLow": possibleLow_Damage,
+                "possibleDamageHigh": possibleHigh_Damage,
+                "possibleBlocks": possible_Block,
+                "possibleSummons":  possible_Summons
+            };
         }
 
         isRedacted(){
@@ -838,6 +1089,8 @@
         }
 
         cleanUp(){
+            this.stayed = false;
+
             this.claimedPrizes = false;
             this.retrievedPlayedCards = false;
 
@@ -891,6 +1144,39 @@
             this.plays.innerHTML = playRow;
 
 
+        }
+
+        gameOver() {
+            return this.stayed;
+        }
+        drawScore(redacted = true) {
+            let scoreBoard = document.getElementById('score');
+
+            if (table.gameOver()) {
+                scoreBoard.innerText = ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
+            } else {
+                let currentEstimate = this.currentScores((redacted));
+                let currentRabbit = '';
+                if (currentEstimate.bunny.low != currentEstimate.bunny.high) {
+                    currentRabbit = currentEstimate.bunny.low + '-' + currentEstimate.bunny.high;
+                } else {
+                    currentRabbit = currentEstimate.bunny.low
+                }
+                if (currentEstimate.bunny.summon > 0) {
+                    currentRabbit += ' +' + currentEstimate.bunny.summon + ' Summon';
+                }
+                let currentLizard = '';
+                if(currentEstimate.lizard.low != currentEstimate.lizard.high) {
+                    currentLizard = currentEstimate.lizard.low + '-' + currentEstimate.lizard.high;
+                } else {
+                    currentLizard = currentEstimate.lizard.low
+                }
+                if (currentEstimate.bunny.summon > 0) {
+                    currentLizard += ' +' + currentEstimate.lizard.summon + ' Summon';
+                }
+                scoreBoard.innerText = '[Rabbit:' + currentRabbit + ' Lizard:' + currentLizard+ ']' + ((redacted) ? '(Estimate)':'');
+
+            }
         }
 
     }
@@ -993,7 +1279,9 @@
             console.log('Bunny discovers the Private Information!')
             table.lk_Slots[0].toText(false)
             table.drawBoard(false)
+            table.drawScore(false)
         } else {
+            table.drawScore()
             table.drawBoard()
         }
 
@@ -1007,21 +1295,22 @@
         let last_game_outcome = document.getElementById('last_game_outcome')
 
         table.stay();
+        table.drawScore(false);
         table.drawBoard(false);
 
         if (table.didPlayerWin()) {
             console.log('Rabbits win!');
-            last_game_outcome.innerText = 'Rabbit Wins!' + ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
+            last_game_outcome.innerText = 'Rabbit Wins!';
 
             let newPoints = table.claimPrize();
             points += newPoints;
             console.log('Took ' + newPoints + ' lizards hostage');
         } else if (table.didPlayerTie()) {
             console.log('Tie Game!');
-            last_game_outcome.innerText = 'Tie Game' + ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
+            last_game_outcome.innerText = 'Tie Game';
         } else {
             console.log('Lizard King wins!');
-            last_game_outcome.innerText = 'Lizard King Wins!' + ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
+            last_game_outcome.innerText = 'Lizard King Wins!';
         }
         if (table.didPlayerWin() || table.didPlayerTie()) {
             let returnedCards = table.retrievePlayedCards();
