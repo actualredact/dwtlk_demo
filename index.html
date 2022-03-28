@@ -14,41 +14,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
     <title> DWTLK </title>
+    <style>
+        .card {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h2> DWTLK </h2>
+<h2> DWTLK </h2>
 
-    <button type="button" class="btn btn-primary" value="Start Game" id="play_bunny_button" >Play Bunny</button>
-    <button type="button" class="btn btn-warning" value="Stay" id="stay_button"  hidden="hidden">Attack</button>
+<button type="button" class="btn btn-primary" value="Start Game" id="play_bunny_button" >Play Bunny</button>
+<button type="button" class="btn btn-warning" value="Stay" id="stay_button"  hidden="hidden">Attack</button>
 
-    <div>
-        <span>[<a href='DWTLK.pdf'>Help</a>]</span>
-        <span>Bunny Library:<span id="bunny_library_count">15</span></span>
-        <span>Games Played:<span id="games_played">0</span></span>
-        <span>Captured Lizards:<span id="points">0</span></span>
-    </div>
-    <div>
-        <h4><span id="last_game_outcome"></span></h4>
-    </div>
+<div>
+    <span>[<a href='DWTLK.pdf'>Help</a>]</span>
+    <span>Bunny Library:<span id="bunny_library_count">15</span></span>
+    <span>Games Played:<span id="games_played">0</span></span>
+    <span>Captured Lizards:<span id="points">0</span></span>
+</div>
+<div>
+    <h4><span id="last_game_outcome"></span></h4>
+</div>
 
-    <div class="row">
-        <div class="row row-cols-2 " id="bunny_area">
-
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="row ">
-                <hr \>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="row row-cols-2 " id="lizard_area">
+<div class="row" id="plays">
 
 
-        </div>
-    </div>
+</div>
 
 
 <!-- Optional JavaScript; choose one of the two! -->
@@ -82,7 +73,7 @@
             this.suit = suit;
 
             if (this.number < 12) {
-                this.special = 'REDACT_EXPOSE';
+                this.special = 'REDACT_OR_EXPOSE';
             } else {
                 this.special = 'SUMMON';
             }
@@ -209,7 +200,9 @@
                         actionHTML += `<li class="list-group-item">${this.actionStack[actionPointer][1]} [${this.piStack[actionPointer].number}] </li>`
                     }
                 }
+
             }
+            //actionHTML += `<li class="list-group-item"></li>`
             return actionHTML;
         }
         cardToHTML(redacted = true) {
@@ -443,8 +436,7 @@
             this.retrievedPlayedCards = false;
 
 
-            this.lizardArea = document.getElementById('lizard_area');
-            this.bunnyArea = document.getElementById('bunny_area');
+            this.plays = document.getElementById('plays');
 
             this.bunnyLibraryCounter = document.getElementById('bunny_library_count');
             this.gamesPlayerCounter = document.getElementById('games_played');
@@ -803,7 +795,7 @@
             for (let cardPointer = 0; cardPointer < this.rr_Slots.length; cardPointer++ ){
                 for (let actionPointer = 0; actionPointer < this.rr_Slots[cardPointer].actionStack.length; actionPointer++) {
                     if (this.rr_Slots[cardPointer].actionStack[actionPointer][0] === 'SPECIAL') {
-                        if (this.rr_Slots[cardPointer].piStack[actionPointer].special === 'REDACT_EXPOSE') {
+                        if (this.rr_Slots[cardPointer].piStack[actionPointer].special === 'REDACT_OR_EXPOSE') {
                             exposedCount += 1;
                         }
                     }
@@ -813,7 +805,7 @@
             for (let cardPointer = 0; cardPointer < this.lk_Slots.length; cardPointer++ ){
                 for (let actionPointer = 0; actionPointer < this.lk_Slots[cardPointer].actionStack.length; actionPointer++) {
                     if (this.lk_Slots[cardPointer].actionStack[actionPointer][0] === 'SPECIAL') {
-                        if (this.lk_Slots[cardPointer].piStack[actionPointer].special === 'REDACT_EXPOSE') {
+                        if (this.lk_Slots[cardPointer].piStack[actionPointer].special === 'REDACT_OR_EXPOSE') {
                             redactedCount += 1;
                         }
                     }
@@ -843,7 +835,6 @@
             console.log(this.rr_Slots);
         }
 
-
         cleanUp(){
             this.claimedPrizes = false;
             this.retrievedPlayedCards = false;
@@ -864,62 +855,39 @@
 
         drawBoard(redacted = true) {
 
-            this.lizardArea.innerHTML = '';
-            let newLizardArea = '';
+            this.plays.innerHTML = '';
 
-            this.bunnyArea.innerHTML  = '';
-            let newBunnyArea ='';
+            let playRow = '';
 
             this.bunnyLibraryCounter.innerText = bunnyLibrary.numberOfCards()
             this.gamesPlayerCounter.innerText = games;
             this.pointsCounter.innerText = points;
 
 
-            for (let cardPointer = 0; cardPointer < this.rr_Slots.length; cardPointer++) {
-                console.log(newBunnyArea)
-                newBunnyArea += this.rr_Slots[cardPointer].cardToHTML(false);
-                newBunnyArea += '<div class="col  col-sm-1">'
-                for (let piCardPointer = 0; piCardPointer < this.rr_Slots[cardPointer].piStack.length; piCardPointer++) {
-                    newBunnyArea += this.rr_Slots[cardPointer].piStack[piCardPointer].toHTML(false);
-                }
-                newBunnyArea += '</div>'
-
-            }
-
-
             for (let cardPointer = 0; cardPointer < this.rr_SummonSlots.length; cardPointer++) {
-                newBunnyArea += this.rr_SummonSlots[cardPointer].cardToHTML(false);
-                newBunnyArea += '<div class="col  col-sm-1">'
-                for (let piCardPointer = 0; piCardPointer < this.rr_SummonSlots[cardPointer].piStack.length; piCardPointer++) {
-                    newBunnyArea += this.rr_SummonSlots[cardPointer].piStack[piCardPointer].toHTML(false);
-                }
-                newBunnyArea += '</div>'
+                playRow += '<div class="row row-cols-2">';
+                playRow += this.rr_SummonSlots[cardPointer].cardToHTML(false);
+                playRow += '</div>'
 
             }
-
-            for (let cardPointer = 0; cardPointer < this.lk_Slots.length; cardPointer++) {
-                newLizardArea += this.lk_Slots[cardPointer].cardToHTML(redacted);
-                newLizardArea += '<div class="col  col-sm-1">'
-                for (let piCardPointer = 0; piCardPointer < this.lk_Slots[cardPointer].piStack.length; piCardPointer++) {
-                    newLizardArea += this.lk_Slots[cardPointer].piStack[piCardPointer].toHTML(redacted);
-                }
-                newLizardArea += '</div>'
-
-            }
-
 
             for (let cardPointer = 0; cardPointer < this.lk_SummonSlots.length; cardPointer++) {
-                newLizardArea += this.lk_SummonSlots[cardPointer].cardToHTML(redacted);
-                newLizardArea += '<div class="col col-sm-1">'
-                for (let piCardPointer = 0; piCardPointer < this.lk_SummonSlots[cardPointer].piStack.length; piCardPointer++) {
-                    newLizardArea += this.lk_SummonSlots[cardPointer].piStack[piCardPointer].toHTML(false);
-                }
-                newLizardArea += '</div>'
+                playRow += '<div class="row row-cols-2">';
+                playRow += this.lk_SummonSlots[cardPointer].cardToHTML(redacted);
+                playRow += '</div>'
 
             }
 
-            this.bunnyArea.innerHTML = newBunnyArea;
-            this.lizardArea.innerHTML = newLizardArea;
+            for (let cardPointer = this.rr_Slots.length - 1; cardPointer >= 0; cardPointer--) {
+                playRow += '<div class="row row-cols-2">';
+                playRow += this.rr_Slots[cardPointer].cardToHTML(false);
+                playRow += this.lk_Slots[cardPointer].cardToHTML(redacted);
+                playRow += '</div>'
+            }
+
+
+            this.plays.innerHTML = playRow;
+
 
         }
 
@@ -1002,10 +970,10 @@
     }
 
 
-   // while (bunnyLibrary.numberOfCards() > 3) {
-     //   playGame();
-     //   console.log (bunnyLibrary.numberOfCards() + ' ' + games + ' ' +points )
-   // }
+    // while (bunnyLibrary.numberOfCards() > 3) {
+    //   playGame();
+    //   console.log (bunnyLibrary.numberOfCards() + ' ' + games + ' ' +points )
+    // }
 
 
     let play_bunny_button = function () {
@@ -1032,12 +1000,12 @@
         }
     }
 
-   let stay_button = function (){
+    let stay_button = function (){
         games++;
         let last_game_outcome = document.getElementById('last_game_outcome')
 
-       table.stay();
-       table.drawBoard(false);
+        table.stay();
+        table.drawBoard(false);
 
         if (table.didPlayerWin()) {
             console.log('Rabbits win!');
@@ -1062,7 +1030,7 @@
 
         document.getElementById('bunny_library_count').innerText = bunnyLibrary.numberOfCards()
         table.cleanUp();
-       document.getElementById('stay_button').hidden = true;
+        document.getElementById('stay_button').hidden = true;
     }
 
     document.getElementById('play_bunny_button').addEventListener("click", play_bunny_button);
