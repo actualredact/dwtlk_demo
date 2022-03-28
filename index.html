@@ -1158,7 +1158,7 @@
                 let currentEstimate = this.currentScores((redacted));
                 let currentRabbit = '';
                 if (currentEstimate.bunny.low != currentEstimate.bunny.high) {
-                    currentRabbit = currentEstimate.bunny.low + '-' + currentEstimate.bunny.high;
+                    currentRabbit = ((currentEstimate.bunny.low < 0) ? '('+ currentEstimate.bunny.low +')': currentEstimate.bunny.low ) + '-' + ((currentEstimate.bunny.high < 0) ?'(' + currentEstimate.bunny.high +')':currentEstimate.bunny.high);
                 } else {
                     currentRabbit = currentEstimate.bunny.low
                 }
@@ -1167,7 +1167,7 @@
                 }
                 let currentLizard = '';
                 if(currentEstimate.lizard.low != currentEstimate.lizard.high) {
-                    currentLizard = currentEstimate.lizard.low + '-' + currentEstimate.lizard.high;
+                    currentLizard = ((currentEstimate.lizard.low < 0) ? '('+currentEstimate.lizard.low +')': currentEstimate.lizard.low ) + '-' + ((currentEstimate.lizard.high < 0) ?'(' + currentEstimate.lizard.high +')':currentEstimate.lizard.high);
                 } else {
                     currentLizard = currentEstimate.lizard.low
                 }
