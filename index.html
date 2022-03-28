@@ -1159,7 +1159,7 @@
             let scoreBoard = document.getElementById('score');
 
             if (table.gameOver()) {
-                scoreBoard.innerText = ' [Rabbit:' + table.rr_Health + ' Lizard:' + table.lk_Health+ ']';
+                scoreBoard.innerText = ' [Rabbit:' + table.rr_Health + '] [Lizard:' + table.lk_Health+ ']';
             } else {
                 let currentEstimate = this.currentScores((redacted));
                 let currentRabbit = '';
@@ -1168,19 +1168,22 @@
                 } else {
                     currentRabbit = currentEstimate.bunny.low
                 }
+
                 if (currentEstimate.bunny.summon > 0) {
                     currentRabbit += ' +' + currentEstimate.bunny.summon + ' Summon';
                 }
+
                 let currentLizard = '';
                 if(currentEstimate.lizard.low != currentEstimate.lizard.high) {
                     currentLizard = ((currentEstimate.lizard.low < 0) ? '('+currentEstimate.lizard.low +')': currentEstimate.lizard.low ) + '-' + ((currentEstimate.lizard.high < 0) ?'(' + currentEstimate.lizard.high +')':currentEstimate.lizard.high);
                 } else {
                     currentLizard = currentEstimate.lizard.low
                 }
-                if (currentEstimate.bunny.summon > 0) {
+
+                if (currentEstimate.lizard.summon > 0) {
                     currentLizard += ' +' + currentEstimate.lizard.summon + ' Summon';
                 }
-                scoreBoard.innerText = '[Rabbit:' + currentRabbit + ' Lizard:' + currentLizard+ ']' + ((redacted) ? '(Estimate)':'');
+                scoreBoard.innerText = '[Rabbit:' + currentRabbit + '] [Lizard:' + currentLizard+ ']' + ((redacted) ? '(Estimate)':'');
 
             }
         }
